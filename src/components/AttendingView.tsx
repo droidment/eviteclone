@@ -52,8 +52,7 @@ export function AttendingView() {
           <p className="eyebrow">Guests attending</p>
           <h1>Who has said yes</h1>
           <p className="lede">
-            This list only includes guests who RSVP Yes and chose to let others know they are
-            attending.
+            This list only shows guests who said Yes and chose to share that they are attending.
           </p>
           <div className="attending-venue">
             <MapPin size={20} weight="duotone" />
