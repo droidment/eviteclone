@@ -1,0 +1,261 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function eventPath(eventId) {
+      return /databases/$(database)/documents/events/$(eventId);
+    }
+
+    function eventExists(eventId) {
+      return exists(eventPath(eventId));
+    }
+
+    function eventData(eventId) {
+      return get(eventPath(eventId)).data;
+    }
+
+    function owns(ownerId) {
+      return signedIn() && request.auth.uid == ownerId;
+    }
+
+    function validEvent() {
+      return request.resource.data.keys().hasOnly([
+        'title',
+        'description',
+        'location',
+        'date',
+        'time',
+        'coverImage',
+        'status',
+        'ownerId',
+        'ownerEmail',
+        'createdAt',
+        'updatedAt'
+      ])
+      && request.resource.data.title is string
+      && request.resource.data.description is string
+      && request.resource.data.location is string
+      && request.resource.data.date is string
+      && request.resource.data.time is string
+      && request.resource.data.coverImage is string
+      && request.resource.data.status in ['draft', 'published']
+      && request.resource.data.ownerId is string
+      && request.resource.data.ownerEmail is string;
+    }
+
+    function validRsvp() {
+      return request.resource.data.keys().hasOnly([
+        'eventId',
+        'guestId',
+        'guestName',
+        'email',
+        'phone',
+        'status',
+        'attendeeCount',
+        'adultCount',
+        'childrenCount',
+        'vegetarianCount',
+        'nonVegetarianCount',
+        'shareAttendance',
+        'message',
+        'createdAt',
+        'updatedAt'
+      ])
+      && request.resource.data.eventId is string
+      && request.resource.data.guestId is string
+      && request.resource.data.guestName is string
+      && request.resource.data.email is string
+      && request.resource.data.phone is string
+      && request.resource.data.status in ['yes', 'no']
+      && request.resource.data.attendeeCount is number
+      && request.resource.data.attendeeCount >= 1
+      && request.resource.data.attendeeCount <= 12
+      && request.resource.data.adultCount is number
+      && request.resource.data.adultCount >= 0
+      && request.resource.data.adultCount <= 12
+      && request.resource.data.childrenCount is number
+      && request.resource.data.childrenCount >= 0
+      && request.resource.data.childrenCount <= 12
+      && request.resource.data.attendeeCount == request.resource.data.adultCount + request.resource.data.childrenCount
+      && request.resource.data.vegetarianCount is number
+      && request.resource.data.vegetarianCount >= 0
+      && request.resource.data.vegetarianCount <= 12
+      && request.resource.data.nonVegetarianCount is number
+      && request.resource.data.nonVegetarianCount >= 0
+      && request.resource.data.nonVegetarianCount <= 12
+      && request.resource.data.attendeeCount >= request.resource.data.vegetarianCount + request.resource.data.nonVegetarianCount
+      && request.resource.data.shareAttendance is bool
+      && request.resource.data.message is string;
+    }
+
+    function isSignedInAnniversaryRsvp() {
+      return request.resource.data.keys().hasOnly([
+          'eventId',
+          'guestId',
+          'guestName',
+          'email',
+          'phone',
+          'status',
+          'attendeeCount',
+          'adultCount',
+          'childrenCount',
+          'vegetarianCount',
+          'nonVegetarianCount',
+          'shareAttendance',
+          'message',
+          'createdAt',
+          'updatedAt'
+        ])
+        && signedIn()
+        && request.resource.data.eventId == 'hema-raj-25-anniversary'
+        && request.resource.data.guestId == request.auth.uid
+        && request.resource.data.guestName is string
+        && request.resource.data.email is string
+        && request.resource.data.phone is string
+        && request.resource.data.status in ['yes', 'no']
+        && request.resource.data.attendeeCount is number
+        && request.resource.data.attendeeCount >= 1
+        && request.resource.data.attendeeCount <= 12
+        && request.resource.data.adultCount is number
+        && request.resource.data.adultCount >= 0
+        && request.resource.data.adultCount <= 12
+        && request.resource.data.childrenCount is number
+        && request.resource.data.childrenCount >= 0
+        && request.resource.data.childrenCount <= 12
+        && request.resource.data.attendeeCount == request.resource.data.adultCount + request.resource.data.childrenCount
+        && request.resource.data.vegetarianCount is number
+        && request.resource.data.vegetarianCount >= 0
+        && request.resource.data.vegetarianCount <= 12
+        && request.resource.data.nonVegetarianCount is number
+        && request.resource.data.nonVegetarianCount >= 0
+        && request.resource.data.nonVegetarianCount <= 12
+        && request.resource.data.attendeeCount >= request.resource.data.vegetarianCount + request.resource.data.nonVegetarianCount
+        && request.resource.data.shareAttendance is bool
+        && request.resource.data.message is string
+        && request.resource.data.createdAt is string
+        && request.resource.data.updatedAt is string;
+    }
+
+    function publicAttendeePath(guestId) {
+      return /databases/$(database)/documents/publicAttendees/$(guestId);
+    }
+
+    function ownsVisibleAttendeeRecord() {
+      return signedIn()
+        && exists(publicAttendeePath(request.auth.uid))
+        && get(publicAttendeePath(request.auth.uid)).data.eventId == 'hema-raj-25-anniversary';
+    }
+
+    function validPublicAttendee() {
+      return request.resource.data.keys().hasOnly([
+          'eventId',
+          'guestId',
+          'guestName',
+          'attendeeCount',
+          'adultCount',
+          'childrenCount',
+          'updatedAt'
+        ])
+        && request.resource.data.eventId == 'hema-raj-25-anniversary'
+        && request.resource.data.guestId == request.auth.uid
+        && request.resource.data.guestName is string
+        && request.resource.data.attendeeCount is number
+        && request.resource.data.attendeeCount >= 1
+        && request.resource.data.attendeeCount <= 12
+        && request.resource.data.adultCount is number
+        && request.resource.data.adultCount >= 0
+        && request.resource.data.adultCount <= 12
+        && request.resource.data.childrenCount is number
+        && request.resource.data.childrenCount >= 0
+        && request.resource.data.childrenCount <= 12
+        && request.resource.data.attendeeCount == request.resource.data.adultCount + request.resource.data.childrenCount
+        && request.resource.data.updatedAt is string;
+    }
+
+    function validOwnMail() {
+      return request.resource.data.keys().hasOnly([
+          'to',
+          'eventId',
+          'guestId',
+          'createdAt',
+          'message'
+        ])
+        && signedIn()
+        && request.resource.data.to == request.auth.token.email
+        && request.resource.data.eventId == 'hema-raj-25-anniversary'
+        && request.resource.data.guestId == request.auth.uid
+        && request.resource.data.createdAt is string
+        && request.resource.data.message.keys().hasOnly(['subject', 'text', 'html'])
+        && request.resource.data.message.subject is string
+        && request.resource.data.message.text is string
+        && request.resource.data.message.html is string;
+    }
+
+    match /events/{eventId} {
+      allow get: if resource.data.status == 'published' || owns(resource.data.ownerId);
+      allow list: if signedIn() && (resource.data.status == 'published' || owns(resource.data.ownerId));
+      allow create: if signedIn()
+        && validEvent()
+        && request.resource.data.ownerId == request.auth.uid;
+      allow update: if owns(resource.data.ownerId)
+        && validEvent()
+        && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if owns(resource.data.ownerId);
+    }
+
+    match /rsvps/{rsvpId} {
+      allow get: if signedIn()
+        && (
+          rsvpId == 'hema-raj-25-anniversary_' + request.auth.uid
+          ||
+          request.auth.uid == resource.data.guestId
+          || (eventExists(resource.data.eventId) && eventData(resource.data.eventId).ownerId == request.auth.uid)
+        );
+      allow list: if false;
+      allow create: if (
+          signedIn()
+          && validRsvp()
+          && request.auth.uid == request.resource.data.guestId
+          && eventExists(request.resource.data.eventId)
+          && eventData(request.resource.data.eventId).status == 'published'
+        )
+        || isSignedInAnniversaryRsvp();
+      allow update: if signedIn()
+        && isSignedInAnniversaryRsvp()
+        && resource.data.eventId == 'hema-raj-25-anniversary'
+        && resource.data.guestId == request.auth.uid
+        && request.resource.data.eventId == resource.data.eventId
+        && request.resource.data.guestId == resource.data.guestId
+        || (
+          signedIn()
+          && validRsvp()
+          && request.auth.uid == resource.data.guestId
+          && request.resource.data.guestId == resource.data.guestId
+          && request.resource.data.eventId == resource.data.eventId
+          && eventExists(resource.data.eventId)
+          && eventData(resource.data.eventId).status == 'published'
+        );
+      allow delete: if signedIn()
+        && eventExists(resource.data.eventId)
+        && eventData(resource.data.eventId).ownerId == request.auth.uid;
+    }
+
+    match /publicAttendees/{guestId} {
+      allow get, list: if ownsVisibleAttendeeRecord();
+      allow create, update: if signedIn()
+        && guestId == request.auth.uid
+        && validPublicAttendee();
+      allow delete: if signedIn() && guestId == request.auth.uid;
+    }
+
+    match /mail/{mailId} {
+      allow create: if validOwnMail();
+      allow read, update, delete: if false;
+    }
+  }
+}

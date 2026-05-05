@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "default": "hemaraj25"
+  },
+  "targets": {},
+  "etags": {
+    "hemaraj25": {
+      "extensionInstances": {
+        "firestore-send-email": "15647f4cb6a250b2d8f543d9a58d975af1e37c0ddb092d84b824fb2f6a2dc919"
+      }
+    }
+  }
+}

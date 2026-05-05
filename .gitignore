@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+
+.env*.local
+extensions/*.env
+
+*.log
+
+.firebase/
+.playwright-mcp/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

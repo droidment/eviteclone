@@ -1,0 +1,49 @@
+{
+  "hosting": {
+    "public": "out",
+    "cleanUrls": true,
+    "redirects": [
+      {
+        "source": "/flyer",
+        "destination": "/images/indian-wedding-theme.jpeg",
+        "type": 302
+      },
+      {
+        "source": "/map",
+        "destination": "https://www.google.com/maps/search/?api=1&query=27921%20Hunt%20Trace%20Ln%2C%20Fulshear%2C%20TX%2077441",
+        "type": 302
+      },
+      {
+        "source": "/calendar",
+        "destination": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Hema+and+Raj+25th+Wedding+Anniversary&dates=20260524T183000%2F20260524T213000&ctz=America%2FChicago&location=Our+Home%2C+27921+Hunt+Trace+Ln%2C+Fulshear%2C+TX+77441&details=25+years+of+love%2C+laughter+and+togetherness.+Your+presence+is+the+greatest+gift+of+all.+No+presents+please.",
+        "type": 302
+      }
+    ],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "hosting": {
+      "port": 5000
+    },
+    "ui": {
+      "enabled": true
+    }
+  },
+  "extensions": {
+    "firestore-send-email": "firebase/firestore-send-email@0.2.8"
+  }
+}
