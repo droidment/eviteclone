@@ -19,6 +19,7 @@ export const flyerUrl = `${publicSiteUrl}${singleEvent.image}`;
 export const shortFlyerUrl = `${publicSiteUrl}/flyer`;
 export const shortMapUrl = `${publicSiteUrl}/map`;
 export const shortCalendarUrl = `${publicSiteUrl}/calendar`;
+export const adminEmails = ["rbalakr@gmail.com", "hema.selvaraj@gmail.com"];
 
 export function getCalendarUrl() {
   const params = new URLSearchParams({

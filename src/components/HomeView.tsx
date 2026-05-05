@@ -19,9 +19,10 @@ import {
   isFirebaseConfigured,
   signOutOfFirebase,
   submitPublicSingleEventRsvp,
-  subscribeToSingleEventRsvp
+  subscribeToSingleEventRsvp,
+  trackSingleEventOpen
 } from "@/lib/firebase";
-import { getWhatsAppRsvpUrl, singleEvent } from "@/lib/singleEvent";
+import { adminEmails, getWhatsAppRsvpUrl, singleEvent } from "@/lib/singleEvent";
 import type { RsvpRecord, RsvpStatus } from "@/lib/types";
 import { useAuthUser } from "@/lib/useAuthUser";
 
@@ -43,6 +44,10 @@ export function HomeView() {
     shareAttendance: false,
     message: ""
   });
+
+  useEffect(() => {
+    void trackSingleEventOpen();
+  }, []);
 
   function updateCount(
     field: "adultCount" | "childrenCount" | "vegetarianCount" | "nonVegetarianCount",
@@ -241,6 +246,12 @@ export function HomeView() {
                   <SignOut size={18} />
                 </button>
               </div>
+
+              {user.email && adminEmails.includes(user.email.toLowerCase()) ? (
+                <Link className="secondary-button admin-link" href="/admin">
+                  View admin totals
+                </Link>
+              ) : null}
 
               {existingRsvp ? (
                 <div className={`saved-rsvp-banner ${existingRsvp.status}`}>

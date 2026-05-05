@@ -60,6 +60,15 @@ export type PublicAttendee = {
   updatedAt: string;
 };
 
+export type PageViewRecord = {
+  id: string;
+  eventId: string;
+  visitorId: string;
+  openCount: number;
+  firstOpenedAt: string;
+  lastOpenedAt: string;
+};
+
 export type EviteState = {
   host: HostUser | null;
   guest: GuestIdentity | null;

@@ -24,10 +24,17 @@ import {
   where,
   writeBatch,
   type Firestore,
+  type QuerySnapshot,
   type Unsubscribe
 } from "firebase/firestore";
 import { flyerUrl, getCalendarUrl, singleEvent } from "./singleEvent";
-import type { EventInput, EventRecord, PublicAttendee, RsvpRecord } from "./types";
+import type {
+  EventInput,
+  EventRecord,
+  PageViewRecord,
+  PublicAttendee,
+  RsvpRecord
+} from "./types";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -67,6 +74,45 @@ export async function signInWithGoogle() {
 export async function signOutOfFirebase() {
   const { auth } = getFirebase();
   await signOut(auth);
+}
+
+export async function trackSingleEventOpen() {
+  if (typeof window === "undefined" || !isFirebaseConfigured) {
+    return;
+  }
+
+  try {
+    const { db } = getFirebase();
+    const visitorIdKey = "hemaRajVisitorId";
+    const firstOpenedKey = "hemaRajFirstOpenedAt";
+    const openCountKey = "hemaRajOpenCount";
+    const now = new Date().toISOString();
+    const fallbackId = `visitor-${Math.random().toString(36).slice(2)}-${Date.now()}`;
+    const visitorId =
+      window.localStorage.getItem(visitorIdKey) ||
+      window.crypto?.randomUUID?.() ||
+      fallbackId;
+    const firstOpenedAt = window.localStorage.getItem(firstOpenedKey) || now;
+    const openCount = Number(window.localStorage.getItem(openCountKey) || "0") + 1;
+
+    window.localStorage.setItem(visitorIdKey, visitorId);
+    window.localStorage.setItem(firstOpenedKey, firstOpenedAt);
+    window.localStorage.setItem(openCountKey, String(openCount));
+
+    await setDoc(
+      doc(db, "pageViews", visitorId),
+      {
+        eventId: singleEvent.id,
+        visitorId,
+        openCount,
+        firstOpenedAt,
+        lastOpenedAt: now
+      },
+      { merge: true }
+    );
+  } catch {
+    // Visit tracking should never block the RSVP flow.
+  }
 }
 
 export function subscribeToHostEvents(
@@ -379,4 +425,39 @@ export function subscribeToPublicAttendees(
     },
     (error) => onError(error.message)
   );
+}
+
+export function subscribeToAdminStats(
+  onNext: (data: { rsvps: RsvpRecord[]; pageViews: PageViewRecord[] }) => void,
+  onError: (message: string) => void
+): Unsubscribe {
+  const { db } = getFirebase();
+  let rsvps: RsvpRecord[] = [];
+  let pageViews: PageViewRecord[] = [];
+
+  const emit = () => onNext({ rsvps, pageViews });
+  const rsvpQuery = query(collection(db, "rsvps"), where("eventId", "==", singleEvent.id));
+  const pageViewQuery = query(collection(db, "pageViews"), where("eventId", "==", singleEvent.id));
+  const readPageViews = (snapshot: QuerySnapshot) => {
+    pageViews = snapshot.docs
+      .map((item) => ({ id: item.id, ...item.data() }) as PageViewRecord)
+      .sort((a, b) => b.lastOpenedAt.localeCompare(a.lastOpenedAt));
+    emit();
+  };
+  const readRsvps = (snapshot: QuerySnapshot) => {
+    rsvps = snapshot.docs
+      .map((item) => ({ id: item.id, ...item.data() }) as RsvpRecord)
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    emit();
+  };
+
+  const unsubscribeRsvps = onSnapshot(rsvpQuery, readRsvps, (error) => onError(error.message));
+  const unsubscribePageViews = onSnapshot(pageViewQuery, readPageViews, (error) =>
+    onError(error.message)
+  );
+
+  return () => {
+    unsubscribeRsvps();
+    unsubscribePageViews();
+  };
 }

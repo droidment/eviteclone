@@ -6,6 +6,11 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email in ['rbalakr@gmail.com', 'hema.selvaraj@gmail.com'];
+    }
+
     function eventPath(eventId) {
       return /databases/$(database)/documents/events/$(eventId);
     }
@@ -195,6 +200,24 @@ service cloud.firestore {
         && request.resource.data.message.html is string;
     }
 
+    function validPageView(pageViewId) {
+      return request.resource.data.keys().hasOnly([
+          'eventId',
+          'visitorId',
+          'openCount',
+          'firstOpenedAt',
+          'lastOpenedAt'
+        ])
+        && request.resource.data.eventId == 'hema-raj-25-anniversary'
+        && request.resource.data.visitorId == pageViewId
+        && request.resource.data.visitorId is string
+        && request.resource.data.openCount is number
+        && request.resource.data.openCount >= 1
+        && request.resource.data.openCount <= 10000
+        && request.resource.data.firstOpenedAt is string
+        && request.resource.data.lastOpenedAt is string;
+    }
+
     match /events/{eventId} {
       allow get: if resource.data.status == 'published' || owns(resource.data.ownerId);
       allow list: if signedIn() && (resource.data.status == 'published' || owns(resource.data.ownerId));
@@ -209,14 +232,15 @@ service cloud.firestore {
     }
 
     match /rsvps/{rsvpId} {
-      allow get: if signedIn()
+      allow get: if isAdmin()
+        || signedIn()
         && (
           rsvpId == 'hema-raj-25-anniversary_' + request.auth.uid
           ||
           request.auth.uid == resource.data.guestId
           || (eventExists(resource.data.eventId) && eventData(resource.data.eventId).ownerId == request.auth.uid)
         );
-      allow list: if false;
+      allow list: if isAdmin();
       allow create: if (
           signedIn()
           && validRsvp()
@@ -256,6 +280,12 @@ service cloud.firestore {
     match /mail/{mailId} {
       allow create: if validOwnMail();
       allow read, update, delete: if false;
+    }
+
+    match /pageViews/{pageViewId} {
+      allow get, list: if isAdmin();
+      allow create, update: if validPageView(pageViewId);
+      allow delete: if false;
     }
   }
 }
