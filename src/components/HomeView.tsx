@@ -198,7 +198,7 @@ export function HomeView() {
 
           {!loading && !user ? (
             <div className="top-signin-action">
-              <GoogleButton label="Sign in with Google" />
+              <GoogleButton label="Sign in to RSVP" />
             </div>
           ) : null}
 

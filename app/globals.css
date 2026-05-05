@@ -887,6 +887,11 @@ h3 {
 .top-signin-action .primary-button {
   width: 100%;
   justify-content: center;
+  border-color: #d5a431;
+  box-shadow:
+    0 0 0 4px rgba(201, 154, 44, 0.16),
+    0 14px 30px -18px rgba(15, 58, 37, 0.72),
+    inset 0 1px 0 rgba(255, 248, 232, 0.44);
 }
 
 .signed-in-line {
