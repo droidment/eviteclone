@@ -898,13 +898,22 @@ h3 {
 }
 
 .top-signin-action .primary-button {
-  width: 100%;
+  min-height: 48px;
+  width: auto;
   justify-content: center;
-  border-color: #1f7f49;
+  border-color: rgba(31, 127, 73, 0.28);
+  padding: 0 18px;
+  background: rgba(31, 127, 73, 0.08);
+  color: var(--accent-dark);
   box-shadow:
-    0 0 0 4px rgba(31, 127, 73, 0.15),
-    0 14px 30px -18px rgba(15, 58, 37, 0.72),
-    inset 0 1px 0 rgba(255, 248, 232, 0.44);
+    0 0 0 4px rgba(31, 127, 73, 0.08),
+    0 12px 28px -22px rgba(15, 58, 37, 0.7),
+    inset 0 1px 0 rgba(255, 248, 232, 0.5);
+}
+
+.top-signin-action .primary-button:hover {
+  border-color: rgba(31, 127, 73, 0.42);
+  background: rgba(31, 127, 73, 0.12);
 }
 
 .signed-in-line {
