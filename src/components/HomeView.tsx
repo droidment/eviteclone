@@ -196,6 +196,12 @@ export function HomeView() {
           <p className="anniversary-title">{singleEvent.title}</p>
           <p className="lede">{singleEvent.subtitle}. A beautiful journey continues.</p>
 
+          {!loading && !user ? (
+            <div className="top-signin-action">
+              <GoogleButton label="Sign in with Google" />
+            </div>
+          ) : null}
+
           <div className="event-facts">
             <div>
               <CalendarBlank size={22} weight="duotone" />

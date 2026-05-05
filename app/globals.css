@@ -880,6 +880,15 @@ h3 {
   line-height: 1.55;
 }
 
+.top-signin-action {
+  margin: 20px 0 24px;
+}
+
+.top-signin-action .primary-button {
+  width: 100%;
+  justify-content: center;
+}
+
 .signed-in-line {
   display: grid;
   grid-template-columns: 1fr 42px;
